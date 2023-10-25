@@ -35,6 +35,28 @@ for dir in "$home_dir"/*/; do
 done
 
 
+===========================================================================================================================
+
+
+#!/bin/bash
+# Проверяем, что скрипт запущен от имени root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Требуются права root для выполнения этого скрипта"
+  exit 1
+fi
+# Переменная для хранения фамилии пользователя
+surname=""
+# Проверяем, что пользователь ввел свою фамилию в качестве аргумента при запуске скрипта
+if [ $# -eq 0 ]; then
+  echo "Введите свою фамилию в качестве аргумента при запуске скрипта"
+  exit 1
+else
+  surname="$1"
+fi
+mv /home/student/Документы/file /home/student/bin
+chmod g+x /home/student/bin/file
+mv /home/student/Документы/file.lib /home/student/lib
+mv /home/student/Документы/file.doc /home/student/share/doc/"$surname"
 
 ===========================================================================================================================
 
@@ -67,3 +89,45 @@ find "$dir_name" -type f -name "*.$file_ext" -exec grep -l "$search_str" {} \; >
 echo "Поиск завершен. Результаты записаны в файл /var/log/фамилия.log."
 
 ===========================================================================================================================
+#!/bin/bash
+home_dir="$HOME"
+output_file="$home_dir/result.txt"
+total_size=0
+subdirs_count=0
+for dir in "$home_dir"/*/; do
+  if [ -d "$dir" ]; then
+    size=$(du -sb "$dir" | awk '{print $1}')
+    total_size=$((total_size + size))
+    subdirs_count=$((subdirs_count + 1))
+  fi
+done
+for dir in "$home_dir"/*/; do
+  if [ -d "$dir" ]; then
+    size=$(du -sb "$dir" | awk '{print $1}')
+    echo -e "$dir\t$size" >> "$output_file"
+  fi
+done
+===========================================================================================================================
+#!/bin/bash
+mv /home/student/Документы/file /home/student/bin
+chmod g+x /home/student/bin/file
+mv /home/student/Документы/file.lib /home/student/lib
+mv /home/student/Документы/file.doc /home/student/share/doc/"sharov"
+===========================================================================================================================
+#!/bin/bash
+read -p "Введите имя каталога: " dir_name
+read -p "Введите расширение файлов: " file_ext
+read -p "Введите строку для поиска: " search_str
+if [ ! -d "$dir_name" ]; then
+    echo "Каталог $dir_name не существует."
+    exit 1
+fi
+if [ ! -f "/home/student/var/log/фамилия.log" ]; then
+    touch /var/log/фамилия.log
+else
+    > /home/student/var/log/фамилия.log
+fi
+
+find "$dir_name" -type f -name "*.$file_ext" -exec grep -l "$search_str" {} \; >> /home/student/var/log/фамилия.log
+
+echo "Поиск завершен. Результаты записаны в файл /var/log/фамилия.log."
