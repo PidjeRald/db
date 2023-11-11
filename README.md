@@ -1,133 +1,157 @@
-#!/bin/bash
-# Переменная, хранящая путь к домашнему каталогу пользователя
-home_dir="$HOME"
-# Переменная, хранящая путь к файлу, в который будет записан результат
-output_file="$home_dir/subdirs_size.txt"
-# Переменная, хранящая общий размер подкаталогов
-total_size=0
-# Переменная, хранящая количество подкаталогов
-subdirs_count=0
-# Цикл, перебирающий все подкаталоги в домашнем каталоге пользователя
-for dir in "$home_dir"/*/; do
-  # Проверяем, является ли текущий элемент каталогом
-  if [ -d "$dir" ]; then
-    # Получаем размер текущего подкаталога в байтах и записываем в переменную
-    size=$(du -sb "$dir" | awk '{print $1}')
-    # Увеличиваем общий размер подкаталогов на размер текущего подкаталога
-    total_size=$((total_size + size))
-    # Увеличиваем счетчик подкаталогов на 1
-    subdirs_count=$((subdirs_count + 1))
-    # Выводим информацию о текущем подкаталоге в консоль
-    echo "Подкаталог: $dir Размер: $size байт"
-  fi
-done
-# Выводим общий размер подкаталогов и количество подкаталогов в консоль
-echo "Общий размер подкаталогов: $total_size байт"
-echo "Количество подкаталогов: $subdirs_count"
-# Формируем таблицу с результатом и записываем в файл
-echo -e "Подкаталог\tРазмер (байт)" > "$output_file"
-echo -e "---------\t-------------" >> "$output_file"
-for dir in "$home_dir"/*/; do
-  if [ -d "$dir" ]; then
-    size=$(du -sb "$dir" | awk '{print $1}')
-    echo -e "$dir\t$size" >> "$output_file"
-  fi
-done
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections.Specialized;
+using System.Drawing;
 
+class ImageProcessor
+{
+    private Bitmap image;
 
-===========================================================================================================================
+    public ImageProcessor(string imagePath)
+    {
+        image = new Bitmap(imagePath);
+    }
 
+    public void SaveImage(string outputPath)
+    {
+        image.Save(outputPath);
+    }
 
-#!/bin/bash
-# Проверяем, что скрипт запущен от имени root
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Требуются права root для выполнения этого скрипта"
-  exit 1
-fi
-# Переменная для хранения фамилии пользователя
-surname=""
-# Проверяем, что пользователь ввел свою фамилию в качестве аргумента при запуске скрипта
-if [ $# -eq 0 ]; then
-  echo "Введите свою фамилию в качестве аргумента при запуске скрипта"
-  exit 1
-else
-  surname="$1"
-fi
-mv /home/student/Документы/file /home/student/bin
-chmod g+x /home/student/bin/file
-mv /home/student/Документы/file.lib /home/student/lib
-mv /home/student/Документы/file.doc /home/student/share/doc/"$surname"
+    public void NearestNeighbor(int newWidth, int newHeight)
+    {
+        Bitmap resizedImage = new Bitmap(newWidth, newHeight);
+        float widthRatio = (float)image.Width / newWidth;
+        float heightRatio = (float)image.Height / newHeight;
+        for (int x = 0; x < newWidth; x++)
+        {
+            for (int y = 0; y < newHeight; y++)
+            {
+                int originalX = (int)(x * widthRatio);
+                int originalY = (int)(y * heightRatio);
+                resizedImage.SetPixel(x, y, image.GetPixel(originalX, originalY));
+            }
+        }
+        image = resizedImage;
+    }
 
-===========================================================================================================================
+    public void BicubicInterpolation(int newWidth, int newHeight)
+    {
+        Bitmap resizedImage = new Bitmap(newWidth, newHeight);
+        float widthRatio = (float)image.Width / newWidth;
+        float heightRatio = (float)image.Height / newHeight;
+        for (int x = 0; x < newWidth; x++)
+        {
+            for (int y = 0; y < newHeight; y++)
+            {
+                float originalX = x * widthRatio;
+                float originalY = y * heightRatio;
+                Color interpolatedColor = BicubicInterpolate(originalX, originalY);
+                resizedImage.SetPixel(x, y, interpolatedColor);
+            }
+        }
+        image = resizedImage;
+    }
 
-#!/bin/bash
-# Скрипт для поиска файлов с заданным расширением и строкой в указанном каталоге
-# и записи результатов в файл /var/log/фамилия.log
+    private Color BicubicInterpolate(float x, float y)
+    {
+        return Color.Black; 
+    }
 
-# Получаем от пользователя имя каталога, расширение файлов и строку поиска
-read -p "Введите имя каталога: " dir_name
-read -p "Введите расширение файлов: " file_ext
-read -p "Введите строку для поиска: " search_str
+    private int[] GetHistogram(Bitmap image)
+    {
+        int[] histogram = new int[256];
+        for (int y = 0; y < image.Height; y++)
+        {
+            for (int x = 0; x < image.Width; x++)
+            {
+                Color pixel = image.GetPixel(x, y);
+                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+                histogram[intensity]++;
+            }
+        }
+        return histogram;
+    }
 
-# Проверяем, существует ли указанный каталог
-if [ ! -d "$dir_name" ]; then
-    echo "Каталог $dir_name не существует."
-    exit 1
-fi
+    private int[] GetCumulativeHistogram(int[] histogram)
+    {
+        int[] cumulativeHistogram = new int[256];
+        cumulativeHistogram[0] = histogram[0];
+        for (int i = 1; i < 256; i++)
+        {
+            cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
+        }
+        return cumulativeHistogram;
+    }
 
-# Проверяем, существует ли файл /var/log/фамилия.log
-if [ ! -f "/home/student/var/log/фамилия.log" ]; then
-    touch /var/log/фамилия.log
-else
-    # Очищаем файл перед записью новых результатов
-    > /home/student/var/log/фамилия.log
-fi
+    public void HistogramEqualization()
+    {
+        int[] histogram = GetHistogram(image);
+        int[] cumulativeHistogram = GetCumulativeHistogram(histogram);
+        for (int y = 0; y < image.Height; y++)
+        {
+            for (int x = 0; x < image.Width; x++)
+            {
+                Color pixel = image.GetPixel(x, y);
+                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+                int newIntensity = cumulativeHistogram[intensity] * 255 / (image.Width * image.Height);
+                Color newPixel = Color.FromArgb(newIntensity, newIntensity, newIntensity);
+                image.SetPixel(x, y, newPixel);
+            }
+        }
+    }
 
-# Ищем файлы с заданным расширением и содержащие заданную строку в указанном каталоге
-find "$dir_name" -type f -name "*.$file_ext" -exec grep -l "$search_str" {} \; >> /home/student/var/log/фамилия.log
+    public void HistogramStretching()
+    {
+        int minIntensity = 255;
+        int maxIntensity = 0;
+        for (int y = 0; y < image.Height; y++)
+        {
+            for (int x = 0; x < image.Width; x++)
+            {
+                Color pixel = image.GetPixel(x, y);
+                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+                if (intensity < minIntensity)
+                {
+                    minIntensity = intensity;
+                }
+                if (intensity > maxIntensity)
+                {
+                    maxIntensity = intensity;
+                }
+            }
+        }
+        for (int y = 0; y < image.Height; y++)
+        {
+            for (int x = 0; x < image.Width; x++)
+            {
+                Color pixel = image.GetPixel(x, y);
+                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+                int newIntensity = (int)((intensity - minIntensity) * 255.0 / (maxIntensity - minIntensity));
+                Color newPixel = Color.FromArgb(newIntensity, newIntensity, newIntensity);
+                image.SetPixel(x, y, newPixel);
+            }
+        }
+    }
+}
 
-echo "Поиск завершен. Результаты записаны в файл /var/log/фамилия.log."
+class Program
+{
+    static void Main()
+    {
+        string imagePath = "C:\\Users\\asdf\\Desktop\\ilya.png";
+        string outputImagePath1 = "C:\\Users\\asdf\\Desktop\\2.png";
+        string outputImagePath2 = "C:\\Users\\asdf\\Desktop\\3.png";
 
-===========================================================================================================================
-#!/bin/bash
-home_dir="$HOME"
-output_file="$home_dir/result.txt"
-total_size=0
-subdirs_count=0
-for dir in "$home_dir"/*/; do
-  if [ -d "$dir" ]; then
-    size=$(du -sb "$dir" | awk '{print $1}')
-    total_size=$((total_size + size))
-    subdirs_count=$((subdirs_count + 1))
-  fi
-done
-for dir in "$home_dir"/*/; do
-  if [ -d "$dir" ]; then
-    size=$(du -sb "$dir" | awk '{print $1}')
-    echo -e "$dir\t$size" >> "$output_file"
-  fi
-done
-===========================================================================================================================
-#!/bin/bash
-mv /home/student/Документы/file /home/student/bin
-chmod g+x /home/student/bin/file
-mv /home/student/Документы/file.lib /home/student/lib
-mv /home/student/Документы/file.doc /home/student/share/doc/"sharov"
-===========================================================================================================================
-#!/bin/bash
-read -p "Введите имя каталога: " dir_name
-read -p "Введите расширение файлов: " file_ext
-read -p "Введите строку для поиска: " search_str
-if [ ! -d "$dir_name" ]; then
-    echo "Каталог $dir_name не существует."
-    exit 1
-fi
-if [ ! -f "/home/student/var/log/фамилия.log" ]; then
-    touch /var/log/фамилия.log
-else
-    > /home/student/var/log/фамилия.log
-fi
+        ImageProcessor image1 = new ImageProcessor(imagePath);
+        image1.NearestNeighbor(1000, 850);
+        image1.SaveImage(outputImagePath1);
 
-find "$dir_name" -type f -name "*.$file_ext" -exec grep -l "$search_str" {} \; >> /home/student/var/log/фамилия.log
+        ImageProcessor image2 = new ImageProcessor(imagePath);
+        image2.BicubicInterpolation(1000, 850);
+        image2.SaveImage(outputImagePath2);
 
-echo "Поиск завершен. Результаты записаны в файл /var/log/фамилия.log."
+    }
+}
