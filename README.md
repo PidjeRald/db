@@ -1,157 +1,113 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Specialized;
-using System.Drawing;
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <algorithm>
+#include <cmath>
+using namespace std;
 
-class ImageProcessor
-{
-    private Bitmap image;
+typedef double T;
 
-    public ImageProcessor(string imagePath)
-    {
-        image = new Bitmap(imagePath);
+void F(int N, int k, vector<T> a, vector<T> b,
+    vector<T> c, vector<T> p, vector<T> f, vector<T>& x) {
+
+    for (int i = 0; i < k; i++) {
+        T R = 1 / b[i];
+        b[i] = 1;
+        c[i] = c[i] * R;
+        p[i] = p[i] * R;
+        f[i] = f[i] * R;
+        R = a[i];
+        a[i] = 0;
+        b[i + 1] = b[i + 1] - c[i] * R;
+        p[i + 1] = p[i + 1] - p[i] * R;
+        f[i + 1] = f[i + 1] - f[i] * R;
+        if (i + 2 == k)
+            c[i + 1] = p[i + 1];
     }
 
-    public void SaveImage(string outputPath)
-    {
-        image.Save(outputPath);
+    for (int i = N - 2; i > k - 1; i--) {
+        T R = 1 / b[i + 1];
+        b[i + 1] = 1;
+        a[i] = a[i] * R;
+        p[i + 1] = p[i + 1] * R;
+        f[i + 1] = f[i + 1] * R;
+        R = c[i];
+        c[i] = 0;
+        if (i == k)
+            a[i] = p[i + 1];
+        b[i] = b[i] - a[i] * R;
+        p[i] = p[i] - p[i + 1] * R;
+        f[i] = f[i] - f[i + 1] * R;
     }
 
-    public void NearestNeighbor(int newWidth, int newHeight)
-    {
-        Bitmap resizedImage = new Bitmap(newWidth, newHeight);
-        float widthRatio = (float)image.Width / newWidth;
-        float heightRatio = (float)image.Height / newHeight;
-        for (int x = 0; x < newWidth; x++)
-        {
-            for (int y = 0; y < newHeight; y++)
-            {
-                int originalX = (int)(x * widthRatio);
-                int originalY = (int)(y * heightRatio);
-                resizedImage.SetPixel(x, y, image.GetPixel(originalX, originalY));
-            }
+    f[k] = f[k] / p[k];
+    p[k] = b[k] = 1;
+    for (int i = 0; i < N; i++)
+        if (i != k) {
+            f[i] = f[i] - f[k] * p[i];
+            p[i] = 0;
         }
-        image = resizedImage;
-    }
 
-    public void BicubicInterpolation(int newWidth, int newHeight)
-    {
-        Bitmap resizedImage = new Bitmap(newWidth, newHeight);
-        float widthRatio = (float)image.Width / newWidth;
-        float heightRatio = (float)image.Height / newHeight;
-        for (int x = 0; x < newWidth; x++)
-        {
-            for (int y = 0; y < newHeight; y++)
-            {
-                float originalX = x * widthRatio;
-                float originalY = y * heightRatio;
-                Color interpolatedColor = BicubicInterpolate(originalX, originalY);
-                resizedImage.SetPixel(x, y, interpolatedColor);
-            }
-        }
-        image = resizedImage;
-    }
-
-    private Color BicubicInterpolate(float x, float y)
-    {
-        return Color.Black; 
-    }
-
-    private int[] GetHistogram(Bitmap image)
-    {
-        int[] histogram = new int[256];
-        for (int y = 0; y < image.Height; y++)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                Color pixel = image.GetPixel(x, y);
-                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
-                histogram[intensity]++;
-            }
-        }
-        return histogram;
-    }
-
-    private int[] GetCumulativeHistogram(int[] histogram)
-    {
-        int[] cumulativeHistogram = new int[256];
-        cumulativeHistogram[0] = histogram[0];
-        for (int i = 1; i < 256; i++)
-        {
-            cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
-        }
-        return cumulativeHistogram;
-    }
-
-    public void HistogramEqualization()
-    {
-        int[] histogram = GetHistogram(image);
-        int[] cumulativeHistogram = GetCumulativeHistogram(histogram);
-        for (int y = 0; y < image.Height; y++)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                Color pixel = image.GetPixel(x, y);
-                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
-                int newIntensity = cumulativeHistogram[intensity] * 255 / (image.Width * image.Height);
-                Color newPixel = Color.FromArgb(newIntensity, newIntensity, newIntensity);
-                image.SetPixel(x, y, newPixel);
-            }
-        }
-    }
-
-    public void HistogramStretching()
-    {
-        int minIntensity = 255;
-        int maxIntensity = 0;
-        for (int y = 0; y < image.Height; y++)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                Color pixel = image.GetPixel(x, y);
-                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
-                if (intensity < minIntensity)
-                {
-                    minIntensity = intensity;
-                }
-                if (intensity > maxIntensity)
-                {
-                    maxIntensity = intensity;
-                }
-            }
-        }
-        for (int y = 0; y < image.Height; y++)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                Color pixel = image.GetPixel(x, y);
-                int intensity = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
-                int newIntensity = (int)((intensity - minIntensity) * 255.0 / (maxIntensity - minIntensity));
-                Color newPixel = Color.FromArgb(newIntensity, newIntensity, newIntensity);
-                image.SetPixel(x, y, newPixel);
-            }
-        }
-    }
+    x[k - 1] = f[k - 1];
+    x[k] = f[k];
+    x[k + 1] = f[k + 1];
+    for (int i = k - 2; i > -1; i--)
+        x[i] = f[i] - c[i] * x[i + 1];
+    for (int i = k + 1; i < N - 1; i++)
+        x[i + 1] = f[i + 1] - a[i] * x[i]; 
+    reverse(x.begin(), x.end());
 }
 
-class Program
-{
-    static void Main()
-    {
-        string imagePath = "C:\\Users\\asdf\\Desktop\\ilya.png";
-        string outputImagePath1 = "C:\\Users\\asdf\\Desktop\\2.png";
-        string outputImagePath2 = "C:\\Users\\asdf\\Desktop\\3.png";
 
-        ImageProcessor image1 = new ImageProcessor(imagePath);
-        image1.NearestNeighbor(1000, 850);
-        image1.SaveImage(outputImagePath1);
-
-        ImageProcessor image2 = new ImageProcessor(imagePath);
-        image2.BicubicInterpolation(1000, 850);
-        image2.SaveImage(outputImagePath2);
-
+int main() {
+    setlocale(LC_ALL, "RUSSIAN");
+    vector<T>
+        /*c{1,1,1,2,1,2},
+        b{ 1,2,1,2,3,3,1 },
+        a{ 1,2,1,2,1,1   },
+        p{ 2,1,1,2,2,2,1 },
+        f{ 4,5,4,5,6,8,3 },*/
+        /*c{5 ,2 ,1,3 ,4,1},
+        b{ 3 ,4 ,2,5 ,1,2,1 },
+        a{ 5 ,4 ,3,2 ,1,3   },
+        p{ 2 ,1 ,1,5 ,2,4,3 },
+        f{ 10,12,7,11,7,8,7 },*/
+        /*c{ 6 ,5 ,4,2 ,3,6,6,1,7 },
+        b{ 6 ,5 ,5,2 ,7,4,6,7,8,4 },
+        a{ 8 ,5 ,3,8 ,6,5,4,3,1 },
+        p{ 8 ,6,3,4,3,4,5,7,5,4 },
+        f{ 5,3,1,3,5,7,9,5,3,2 },*/
+        /*c{ 9,5,4,7,7,2 },
+        b{ 7,6,5,4,5,5,4 },
+        a{ 5,8,3,5,8,6   },
+        p{ 5,4,7,7,5,8,9 },
+        f{ 94,73,72,46,56,71,95 },*/
+        /*c{7245,6542,7134,543,5434,8675,435,6543,2344},
+        b{ 7526,6542,6524,5432,7453,1348,6432,4568,9786,5432 },
+        a{ 2845,524,7654,7354,8765,6544,8765,6534,765 },
+        p{ 6823,9873,2365,8753,5434,1348,6544,765,5437,6863 },
+        f{ 161562101,161058792,84046985,125632028,153374625,162098043,107402212,143486871,144718659,87873807 },*/
+        /*c{76,65,78,65,43,32,76,87,21},
+        b{ 32,43,56,76,32,54,76,87,23,12 },
+        a{ 23,54,34,21,54,23,54,43,32 },
+        p{ 12,64,75,84,43,54,23,65,33,47 },
+        f{ 5312,11362,17410,17695,6646,7882,10550,21674,9113,7122 },*/
+        c{ 5.3,7.9,4.2,7.1,7.3,2.2     },
+        b{ 0.57,4.36,5.85,4.94,5.63,5.82,4.51 },
+        a{ 7.4,8.5,3.2,5.8,8.5,6.2     },
+        p{ 5.4,4.8,4.2,4.9,5.8,8.5,9.5 },
+        f{ 67.052,213.222,136.765,156.032,168.965,214.55,123.374 },
+        x(f.size());
+    int N = f.size(), k = 3, IER = 0;
+    F(N, k, a, b, c, p, f, x);
+    double delta = -1;
+    for (int i = 0; i < N; i++)
+        if (abs(x[i] - 1) > delta)
+            delta = abs(x[i] - 1);
+    for (T t : x) {
+        cout << t << "\n";
     }
+    cout << "delta = " << delta;
+    return 0;
 }
