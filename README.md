@@ -1,338 +1,249 @@
-1----------------------------------------------------------------------------------------
+clear
+clc
 
-1. SELECT first_name, last_name
-   FROM students
-   WHERE student_id IN (SELECT student_id FROM grades WHERE grade = 'A');
+% 1. Ввод матрицы A и создание копии A1
+A = zeros(3, 3);
+for i = 1:3
+  for j = 1:3
+    A(i, j) = i + 2*j - 1;
+  end
+end
+A1 = A
 
-2. SELECT first_name, last_name
-   FROM students
-   WHERE student_id IN (SELECT student_id FROM grades GROUP BY student_id HAVING COUNT(DISTINCT grade) = 3);
+% 2. Матрицы ONE и Z
+ONE = ones(3, 3)
+Z = zeros(3, 3)
 
-3. SELECT student_id
-   FROM grades
-   WHERE grade IN (SELECT grade FROM grades WHERE student_id = 12)
-   AND student_id <> 12;
+% 3. Единичная матрица E
+E = eye(3)
 
-4. SELECT t1.teacher_id, t2.teacher_id
-   FROM teacher_subjects t1, teacher_subjects t2
-   WHERE t1.subject_id = t2.subject_id
-   AND t1.teacher_id <> t2.teacher_id;
+% 4. Удаление строки и столбца
+A2 = A(2:3, :)
+A3 = A(:, 1:2)
 
-5. SELECT first_name, last_name
-   FROM students
-   WHERE student_id NOT IN (SELECT student_id FROM grades WHERE grade = 'A');
+% 5. Добавление столбца
+a = [7; 8; 9];
+A4 = [A a]
 
-6. SELECT subject_name
-   FROM subjects
-   WHERE hours > 50;
+% 6. Транспонированная матрица B
+B = A.'
 
-7. SELECT COUNT(*)
-   FROM students
-   WHERE student_id NOT IN (SELECT student_id FROM grades);
+% 7. Сложение, вычитание
+A_plus_B = A + B;
+A_minus_B = A - B;
+A_plus_ONE = A + ONE;
+A_minus_ONE = A - ONE;
+B_plus_Z = B + Z;
+B_minus_Z = B - Z;
+B_plus_2A = B + 2*A;
+B_na_3 = 3*B;
 
-8. SELECT COUNT(*)
-   FROM students
-   WHERE student_id IN (SELECT student_id FROM grades GROUP BY student_id HAVING COUNT(grade) = 1 AND MAX(grade) = 'A');
+% 8. Поэлементные операции
+A_umnoz_B = A .* B;
+A_delit_B = A ./ B;
+A_quadrat = A.^2;
 
-9. SELECT *
-   FROM subjects
-   WHERE teacher_id = (SELECT teacher_id FROM teachers WHERE last_name = 'Колесников');
+% 9. Умножение матриц
+A_umnoz_B = A * B;
+B_umnoz_E = B * E;
+A_umnoz_E = A * E;
+A_umnoz_ONE = A * ONE;
 
-10. SELECT teachers.first_name, teachers.last_name
-    FROM teachers, teacher_subjects
-    WHERE teachers.teacher_id = teacher_subjects.teacher_id
-    AND teacher_subjects.course = 1;
+% 10. Векторы-строки
+a = A(1, :)
+b = A(3, :)
+c = A(:, 2)
+d = A(:, 3)
 
-11. SELECT students.first_name, students.last_name
-    FROM students, universities
-    WHERE students.university_city <> universities.city;
+% 11. Перестановка строк и столбцов
+A = [A(2, :); A(1, :); A(3, :)]
+A = [A(:, 3) A(:, 1) A(:, 2)]
 
-12. SELECT COUNT(*)
-    FROM grades
-    WHERE student_id = 32 AND grade <> 'F';
+% 12. Диагональ и след
+d = diag(A)
+sled_A = sum(d);
 
-13. SELECT teachers.first_name, teachers.last_name
-    FROM teachers, teacher_subjects
-    WHERE teachers.teacher_id = teacher_subjects.teacher_id
-    GROUP BY teachers.teacher_id
-    HAVING COUNT(DISTINCT subject_id) >= 2;
+% 13. Определители
+det_A = det(A);
+det_B = det(B);
+det_E = det(E);
+det_ONE = det(ONE);
 
-14. SELECT teachers.first_name, teachers.last_name
-    FROM teachers, teacher_subjects
-    WHERE teachers.teacher_id = teacher_subjects.teacher_id
-    GROUP BY teachers.teacher_id
-    HAVING COUNT(DISTINCT semester) >= 2;
+% 14. Ранг матрицы
+rank_A = rank(A);
 
-15. SELECT subject_name
-    FROM subjects
-    GROUP BY subject_name
-    HAVING COUNT(DISTINCT teacher_id) >= 2;
+% 15. Изменение элемента A(2,3)
+A(2, 3) = 27
 
-16. SELECT subjects.subject_name, teachers.first_name, teachers.last_name, students.city
-    FROM subjects
-    JOIN teacher_subjects ON subjects.subject_id = teacher_subjects.subject_id
-    JOIN teachers ON teacher_subjects.teacher_id = teachers.teacher_id
-    JOIN students ON subjects.university_id = students.university_id
-    WHERE students.university_name = 'ВГУ';
+% 16. Обратная матрица AI
+AI = inv(A)
 
-17. SELECT SUM(hours)
-    FROM subjects
-    JOIN teacher_subjects ON subjects.subject_id = teacher_subjects.subject_id
-    WHERE teacher_subjects.teacher_id = (SELECT teacher_id FROM teachers WHERE last_name = 'Лагутин');
+% 17. AI*A
+AI_na_A = AI * A
 
-18. SELECT DISTINCT t1.last_name
-    FROM teacher_subjects t1, teacher_subjects t2
-    WHERE t1.subject_id = t2.subject_id AND t1.teacher_id <> t2.teacher_id
-    AND t2.last_name = 'Сорокин';
+% 18. Восстановление A
+A = inv(AI)
 
-19. SELECT last_name
-    FROM teachers
-    GROUP BY last_name
-    HAVING SUM(hours) > (SELECT SUM(hours) FROM teachers WHERE last_name = 'Николаев');
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-20. SELECT DISTINCT teachers.first_name, teachers.last_name
-    FROM teacher_subjects
-    JOIN teachers ON teacher_subjects.teacher_id = teachers.teacher_id
-    WHERE teacher_subjects.subject_id IN (SELECT subject_id FROM teacher_subjects WHERE teacher_id = (SELECT teacher_id FROM teachers WHERE last_name = 'Сорокин'));
+% 1. Найти аргумент комплексного числа z=(1+9i)(2-3i)
+z = (1 + 9i) * (2 - 3i);
+arg_z = angle(z);
+disp(['Аргумент комплексного числа z = ', num2str(arg_z)]);
 
-21. SELECT DISTINCT teachers.last_name
-    FROM teachers
-    JOIN teacher_subjects ON teachers.teacher_id = teacher_subjects.teacher_id
-    JOIN subjects ON teacher_subjects.subject_id = subjects.subject_id
-    JOIN students ON subjects.university_id = students.university_id
-    JOIN universities ON students.university_id = universities.university_id
-    WHERE universities.rating < 200;
+% 2. Найти первообразную функции f(x)=интеграл от (ln(1-x))dx
+syms x;
+f = int(log(1-x), x)
 
-22. SELECT university_name
-    FROM universities
-    WHERE city = 'Москва' AND rating < (SELECT rating FROM universities WHERE university_name = 'ВГУ');
+% 3. Построить график функции f(x)=x-(x), где с шагом 0,01 и 0,03 в декартовой системе координат.
+x1 = -10:0.01:10;
+x2 = -10:0.03:10;
+y1 = x1 - (x1);
+y2 = x2 - (x2);
+figure;
+subplot(2,1,1);
+plot(x1, y1);
+title('График функции f(x)=x-(x) с шагом 0.01');
+subplot(2,1,2);
+plot(x2, y2);
+title('График функции f(x)=x-(x) с шагом 0.03');
 
-23. SELECT students.last_name
-    FROM students
-    JOIN universities ON students.university_id = universities.university_id
-    ORDER BY universities.city
-    LIMIT 1;
+% 4. Построить график функции f(x)=cos(6x), где с шагом 0.01 в полярной системе координат.
+x = 0:0.01:2*pi;
+r = cos(6*x);
+figure;
+polarplot(x, r);
+title('График функции f(x)=cos(6x) в полярной системе координат');
 
-24. SELECT last_name
-    FROM students
-    GROUP BY last_name
-    HAVING AVG((SELECT grade FROM grades WHERE student_id = students.student_id)) > 4;
+% 5. Построить график функции f(x,y)=|x|+|y|-|x+y|, с шагом 0,1 в трехмерной системе координат.
+[X, Y] = meshgrid(-10:0.1:10, -10:0.1:10);
+Z = abs(X) + abs(Y) - abs(X + Y);
+figure;
+surf(X, Y, Z);
+title('График функции f(x,y)=|x|+|y|-|x+y| в трехмерной системе координат');
 
-25. SELECT SUM(hours)
-    FROM subjects
-    JOIN students ON subjects.university_id = students.university_id
-    WHERE students.course = 1 AND students.university_name = 'ВГУ';
 
-26. SELECT AVG(hours)
-    FROM subjects
-    JOIN students ON subjects.university_id = students.university_id
-    WHERE students.course = 2 AND students.university_name = 'ВГУ';
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
-27. SELECT COUNT(*)
-    FROM students
-    WHERE student_id IN (SELECT student_id FROM grades WHERE grade = 'F')
-    AND city <> (SELECT city FROM universities WHERE university_id = students.university_id);
+% Параметры модели Ферхюльста
+r = 0.66; % коэффициент роста
+K = 202; % предельная ёмкость среды
 
-28. SELECT last_name
-    FROM students
-    GROUP BY last_name
-    HAVING COUNT(DISTINCT grade) = 1 AND MAX(grade) = 'A'
-    AND city <> (SELECT city FROM universities WHERE university_id = students.university_id);
+% Изначальные условия для Ферхюльста
+N0 = 1; % начальное количество бактерий
+t0 = 0; % начальное время
+t1 = 10; % конечное время
 
-29. SELECT last_name
-    FROM students
-    GROUP BY last_name
-    HAVING COUNT(DISTINCT grade) >= 2
-    AND city <> (SELECT city FROM universities WHERE university_id = students.university_id);
+% Шаг интегрирования для метода Эйлера
+h = 0.01;
 
-30. Получить фамилии студентов, сдававших экзамен по информатике:
-   - SELECT last_name FROM students WHERE student_id IN (SELECT student_id FROM grades WHERE subject_id = (SELECT subject_id FROM subjects WHERE subject_name = 'Информатика'));
-   - SELECT last_name FROM students WHERE student_id IN (SELECT student_id FROM grades WHERE grade <> 'F' AND subject_id IN (SELECT subject_id FROM subjects WHERE subject_name = 'Информатика'));
-   - ...
+% Инициализация переменных для метода Эйлера
+N = N0;
+t = t0;
 
-31. Получить фамилии преподавателей, обучающих информатике:
-   - SELECT last_name FROM teachers WHERE teacher_id IN (SELECT teacher_id FROM teacher_subjects WHERE subject_id = (SELECT subject_id FROM subjects WHERE subject_name = 'Информатика'));
-   - SELECT last_name FROM teachers WHERE teacher_id IN (SELECT teacher_id FROM teacher_subjects WHERE subject_id IN (SELECT subject_id FROM subjects WHERE subject_name = 'Информатика'));
-   - ...
+% Цикл интегрирования методом Эйлера для уравнения Ферхюльста
+while t < t1
+    dNdt = r * N * (1 - N/K); % уравнение Ферхюльста
+    N = N + h * dNdt;
+    t = t + h;
+end
 
-2----------------------------------------------------------------------------------------
+disp(['Популяция бактерий по модели Ферхюльста через 10 дней: ', num2str(N)]);
 
-CREATE TABLE Пользователь (
-    Email CHAR(15),
-    ID_пользователя INT,
-    ФИО CHAR(20),
-    PRIMARY KEY (ID_пользователя)
-);
+% Решение задачи Коши dx/dt = rx^2 с начальным условием x(0) = x0
+x0 = 1; % начальное значение x
+tspan = [0 10]; % временной интервал
 
-CREATE TABLE Товар (
-    Цена DOUBLE,
-    ID_товара INT,
-    Название CHAR(20),
-    PRIMARY KEY (ID_товара)
-);
+% Определение дифференциального уравнения для задачи Коши
+dxdt = @(t, x) r*x^2;
 
-CREATE TABLE Заказ (
-    ID_пользователя INT,
-    Дата CHAR(10),
-    ID_заказа INT,
-    Статус CHAR(10),
-    ID_товара INT,
-    PRIMARY KEY (ID_заказа),
-    FOREIGN KEY (ID_пользователя) REFERENCES Пользователь(ID_пользователя),
-    FOREIGN KEY (ID_товара) REFERENCES Товар(ID_товара)
-);
+% Установка параметров погрешности для ode45
+options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
 
-CREATE TABLE Заказ_Товар (
-    ID_заказа INT,
-    ID_товара INT,
-    FOREIGN KEY (ID_заказа) REFERENCES Заказ(ID_заказа),
-    FOREIGN KEY (ID_товара) REFERENCES Товар(ID_товара),
-    PRIMARY KEY (ID_заказа, ID_товара)
-);
+% Использование ode45 для численного решения дифференциального уравнения с установленными параметрами погрешности
+[t, x_approx] = ode45(dxdt, tspan, x0, options);
 
--- Заполнение таблицы "Пользователь"
-INSERT INTO Пользователь (Email, ID_пользователя, ФИО)
-VALUES ('user1@example.com', 1, 'Иванов Иван Иванович');
+% Вывод результатов задачи Коши
+disp(['Популяция по решению задачи Коши через 10 единиц времени: ', num2str(x_approx(end))]);
+clear 
+clc 
 
--- Заполнение таблицы "Товар"
-INSERT INTO Товар (Цена, ID_товара, Название)
-VALUES (100.50, 1, 'Футболка'),
-       (200.75, 2, 'Джинсы');
+% Параметры модели Ферхюльста
+r = 0.66; % коэффициент роста
+K = 202; % предельная ёмкость среды
 
--- Заполнение таблицы "Заказ"
-INSERT INTO Заказ (ID_пользователя, Дата, ID_заказа, Статус, ID_товара)
-VALUES (1, '2022-05-15', 1, 'Оплачен', 1),
-       (1, '2022-05-16', 2, 'В обработке', 2);
+% Изначальные условия для Ферхюльста
+N0 = 1; % начальное количество бактерий
+t0 = 0; % начальное время
+t1 = 10; % конечное время
 
--- Заполнение таблицы "Заказ_Товар"
-INSERT INTO Заказ_Товар (ID_заказа, ID_товара)
-VALUES (1, 1),
-       (2, 2);
+% Шаг интегрирования для метода Эйлера
+h = 0.01;
 
-3----------------------------------------------------------------------------------------
+% Инициализация переменных для метода Эйлера
+N = N0;
+t = t0;
 
-CREATE TABLE EXAM_MARKS (
-    STUDENT_ID INT,
-    SUBJECT_ID INT,
-    EXAM_DATE DATE,
-    MARK INT,
-    PRIMARY KEY (STUDENT_ID, SUBJECT_ID, EXAM_DATE),
-    UNIQUE (STUDENT_ID, SUBJECT_ID),
-    UNIQUE (EXAM_DATE)
-);
+% Цикл интегрирования методом Эйлера для уравнения Ферхюльста
+while t < t1
+    dNdt = r * N * (1 - N/K); % уравнение Ферхюльста
+    N = N + h * dNdt;
+    t = t + h;
+end
 
-CREATE TABLE SUBJECT (
-    SUBJ_ID INT PRIMARY KEY,
-    SUBJECT_NAME VARCHAR(50),
-    HOURS INT DEFAULT 36 CHECK (HOURS > 0),
-    SEMESTER INT CHECK (SEMESTER BETWEEN 1 AND 12)
-);
+disp(['Популяция бактерий по модели Ферхюльста через 10 дней: ', num2str(N)]);
 
-CREATE TABLE EXAM_MARKS (
-    STUDENT_ID INT NOT NULL,
-    SUBJ_ID INT NOT NULL,
-    EXAM_ID INT NOT NULL,
-    EXAM_DATE DATE,
-    MARK INT,
-    PRIMARY KEY (STUDENT_ID, SUBJ_ID, EXAM_ID),
-    FOREIGN KEY (SUBJ_ID) REFERENCES SUBJECT(SUBJ_ID),
-    CHECK (EXAM_ID > SUBJ_ID),
-    CHECK (SUBJ_ID > STUDENT_ID)
-);
+% Решение задачи Коши dx/dt = rx^2 с начальным условием x(0) = x0
+x0 = 1; % начальное значение x
+tspan = [0 10]; % временной интервал
 
-4----------------------------------------------------------------------------------------
+% Определение дифференциального уравнения для задачи Коши
+dxdt = @(t, x) r*x^2;
 
-CREATE TABLE SUBJECT_1 (
-    SUBJ_ID INT PRIMARY KEY,
-    SUBJECT_NAME VARCHAR(50),
-    HOURS INT DEFAULT 36 CHECK (HOURS > 0),
-    SEMESTER INT CHECK (SEMESTER BETWEEN 1 AND 12)
-);
+% Установка параметров погрешности для ode45
+options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
 
-CREATE TABLE SUBJ_LECT_1 (
-    LECTURER_ID INT,
-    SUBJ_ID INT,
-    PRIMARY KEY (LECTURER_ID, SUBJ_ID),
-    FOREIGN KEY (LECTURER_ID) REFERENCES LECTURER_1(LECTURER_ID),
-    FOREIGN KEY (SUBJ_ID) REFERENCES SUBJECT_1(SUBJ_ID)
-);
+% Использование ode45 для численного решения дифференциального уравнения с установленными параметрами погрешности
+[t, x_approx] = ode45(dxdt, tspan, x0, options);
 
-CREATE TABLE SUBJ_LECT_1 (
-    LECTURER_ID INT,
-    SUBJ_ID INT,
-    PRIMARY KEY (LECTURER_ID, SUBJ_ID),
-    FOREIGN KEY (LECTURER_ID) REFERENCES LECTURER_1(LECTURER_ID) ON UPDATE RESTRICT ON DELETE RESTRICT,
-    FOREIGN KEY (SUBJ_ID) REFERENCES SUBJECT_1(SUBJ_ID) ON UPDATE RESTRICT ON DELETE RESTRICT
-);
+% Вывод результатов задачи Коши
+disp(['Популяция по решению задачи Коши через 10 единиц времени: ', num2str(x_approx(end))]);
 
-CREATE TABLE LECTURER_1 (
-    LECTURER_ID INT PRIMARY KEY,
-    UNIV_ID INT,
-    FOREIGN KEY (UNIV_ID) REFERENCES UNIVERSITY_1(UNIV_ID) ON UPDATE CASCADE ON DELETE CASCADE
-);
 
-CREATE TABLE UNIVERSITY_1 (
-    UNIV_ID INT PRIMARY KEY,
-    UNIVERSITY_NAME VARCHAR(50)
-);
+====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
-CREATE TABLE EXAM_MARKS_1 (
-    EXAM_ID INT,
-    STUDENT_ID INT,
-    SUBJ_ID INT,
-    MARK INT,
-    PRIMARY KEY (EXAM_ID, STUDENT_ID, SUBJ_ID),
-    FOREIGN KEY (STUDENT_ID) REFERENCES STUDENT_1(STUDENT_ID) ON UPDATE CASCADE ON DELETE NO ACTION,
-    FOREIGN KEY (SUBJ_ID) REFERENCES SUBJECT_1(SUBJ_ID) ON UPDATE CASCADE ON DELETE NO ACTION
-);
+#include <iostream>
+using namespace std;
 
-CREATE TABLE STUDENT_1 (
-    STUDENT_ID INT PRIMARY KEY,
-    NAME VARCHAR(50),
-    GROUP_ID INT,
-    SENIOR_STUDENT INT,
-    FOREIGN KEY (SENIOR_STUDENT) REFERENCES STUDENT_1(STUDENT_ID)
-);
+double f(double x) {
+    return pow(x, 5) - pow(x, 4) + sin(pow(x, 5));
+}
 
-CREATE TABLE STUDENT_2 (
-    STUDENT_ID INT PRIMARY KEY,
-    NAME VARCHAR(50),
-    GROUP_ID INT,
-    UNIV_ID INT,
-    FOREIGN KEY (UNIV_ID) REFERENCES UNIVERSITY_1(UNIV_ID) ON DELETE SET NULL
-);
+bool vipuklost(double u1, double u2, double u3) {
+    double d1 = f(u1) - f(u2);
+    double d2 = f(u3) - f(u2);
+    if (d1 >= 0 && d2 >= 0 && d1 + d2 > 0)
+        return 1;
+    else
+        return 0;
+}
 
--- Запросы CREATE TABLE для всех таблиц
+double parabolaMethod(double h, double u0, double a, double b) {
+    int  i = 2;
+    if (f(u0) < f(u0 + h))
+        h *= -1;
+    double u1 = u0 + h, u2 = u0 +  h * pow(2, i - 1);
+    while (u2 >= a && u2 <= b && f(u1) >= f(u2)) {
+        u0 = u1;
+        u1 = u2;
+        u2 = u0 +  h * pow(2, i - 1);
+        cout << u2 << endl;
+    }
+    return f(u2);
+}
 
--- Запросы ALTER TABLE для добавления ограничений ссылочной целостности
-ALTER TABLE SUBJ_LECT_1 ADD CONSTRAINT fk_subj_lect_lecturer FOREIGN KEY (LECTURER_ID) REFERENCES LECTURER_1(LECTURER_ID) ON UPDATE RESTRICT ON DELETE RESTRICT;
-ALTER TABLE SUBJ_LECT_1 ADD CONSTRAINT fk_subj_lect_subject FOREIGN KEY (SUBJ_ID) REFERENCES SUBJECT_1(SUBJ_ID) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
--- Повторите аналогичные команды ALTER TABLE для остальных таблиц, добавляя необходимые ограничения ссылочной целостности.
-
-5----------------------------------------------------------------------------------------
-
-CREATE VIEW EXCELLENT_STUDENTS_VIEW AS
-SELECT *
-FROM STUDENT_1 S
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM EXAM_MARKS_1 E
-    WHERE E.STUDENT_ID = S.STUDENT_ID AND E.MARK < 5
-);
-
-CREATE VIEW STUDENTS_PER_CITY_VIEW AS
-SELECT CITY, COUNT(*) AS STUDENT_COUNT
-FROM STUDENT_1
-GROUP BY CITY;
-
-CREATE VIEW STUDENT_SCORES_VIEW AS
-SELECT S.STUDENT_ID, S.LAST_NAME, S.FIRST_NAME, AVG(E.MARK) AS AVERAGE_MARK, SUM(E.MARK) AS TOTAL_MARK
-FROM STUDENT_1 S
-JOIN EXAM_MARKS_1 E ON S.STUDENT_ID = E.STUDENT_ID
-GROUP BY S.STUDENT_ID, S.LAST_NAME, S.FIRST_NAME;
-
-CREATE VIEW EXAM_COUNT_PER_STUDENT_VIEW AS
-SELECT STUDENT_ID, COUNT(*) AS EXAM_COUNT
-FROM EXAM_MARKS_1
-GROUP BY STUDENT_ID;
+int main() {
+    double h = 0.0001, u0 = 1.3, a = 1.2, b = 2;
+    cout <<  parabolaMethod(h, u0, a, b); 
+    return 0;
+}
