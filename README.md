@@ -1,166 +1,107 @@
-https://sun9-38.userapi.com/impg/9q45SO8kWk6eFeHbDYWVbizjDUo-nMAYoZPqsQ/p57NVcW_484.jpg?size=1620x2160&quality=95&sign=4c8fed216bf0c20aa9a5793e8a69ca9b&type=album
-https://sun9-28.userapi.com/impg/-UxSfVj57a3HNtXAJjPW7w8wOB5L_LJfolDoGw/ldmUOIZw8Mo.jpg?size=1620x2160&quality=95&sign=2c80a4c2b84b759b9061875e0a900ebe&type=album
+https://sun9-65.userapi.com/impg/JNpbXtp5N8JqmGNJ6fF12sWUvkXinpOwewgmWw/gb0hCC-SBhw.jpg?size=1620x2160&quality=95&sign=50ee3d5781f1f62b4b407841ba8a32db&type=album
+https://sun9-79.userapi.com/impg/7vDYI7_ryfGd57pIaUrZKGompkVIQLUdyK5NiA/o6kfmImSGso.jpg?size=1620x2160&quality=95&sign=98665ebe7580cf0192668e63c5be89e9&type=album
 
-#include <iostream>
-#include <vector>
-using namespace std;
 
-double f(vector<double> x) {
-    return 2 * x[0] * x[0] + 5 * x[1] * x[1] + 19;
-}
+using System;
+using MathNet.Numerics.LinearAlgebra;
 
-vector<double> grad_f(vector<double> x) {
-    vector<double> grad(x.size());
-    grad[0] = 4 * x[0];
-    grad[1] = 10 * x[1];
-    return grad;
-}
+class Program
+{
+    static void Main()
+    {
+        double eps = 0.2;
+        double x0 = -1;
+        double y0 = -1;
+        double[] result1 = minim_method(x0, y0, 10, eps);
+        Console.WriteLine($"x_10 = {result1[0]}, {result1[1]}, f(x_10) = {f(result1[0], result1[1])}");
 
-double norma_grad_f(vector<double> x) {
-    double value = 0;
-    for (int i = 0; i < x.size(); ++i) {
-        value += pow(grad_f(x)[i], 2);
-    }
-    value = pow(value, 0.5);
-    return value;
-}
+        double[] result2 = minim_method(x0, y0, 100, eps);
+        Console.WriteLine($"x_100 = {result2[0]}, {result2[1]}, f(x_100) = {f(result2[0], result2[1])}");
 
-vector<double> gradientMethod(double epsilon, double alpha, vector<double> x0) {
-    vector<double> x = x0;
-    double f_x = f(x);
-
-    while (true) {
-
-        if (norma_grad_f(x) < epsilon) {
-            break;
-        }
-
-        vector<double> new_x(x.size());
-        for (int i = 0; i < x.size(); i++) {
-            new_x[i] = x[i] - alpha * grad_f(x)[i];
-        }
-        double new_f_x = f(new_x);
-
-        if (new_f_x < f_x) {
-            x = new_x;
-            f_x = new_f_x;
-        }
-
-        else {
-            alpha = alpha / 2;
-        }
+        double[] result3 = minim_method(x0, y0, 10000, eps);
+        Console.WriteLine($"x_1000 = {result3[0]}, {result3[1]}, f(x_1000) = {f(result3[0], result3[1])}");
     }
 
-    return x;
-}
-
-int main() {
-    double h = 0.01, epsilon = 0.00001, a = 0.3, b = 0.1;
-    vector<double> x = { a,b };
-    vector<double> z = gradientMethod(h, epsilon, x);
-    for (double xi : z)
-        cout << xi << endl;
-    cout << f(z);
-    return 0;
-}
-
-
-
-
-
-=================================================================================================================================================
-=================================================================================================================================================
-=================================================================================================================================================
-
-
-
-#include <iostream>
-#include <vector>
-using namespace std;
-
-double f(vector<double> x) {
-    return x[0] * x[0] + 2 * x[1] * x[1] - 4 * x[0] + 2 * x[1];
-}
-
-vector<double> grad_f(vector<double> x) {
-    vector<double> grad(x.size());
-    grad[0] = 2 * x[0] - 4;
-    grad[1] = 4 * x[1] + 2;
-    return grad;
-}
-
-vector<double> H_grad_f(vector<double> x) {
-    vector<double> grad = grad_f(x);
-    grad[0] *= 0.5;
-    grad[1] *= 0.25;
-    return grad;
-}
-
-double norma_grad_f(vector<double> x) {
-    double value = 0;
-    for (int i = 0; i < x.size(); i++) {
-        value += pow(grad_f(x)[i], 2);
-    }
-    value = pow(value, 0.5);
-    return value;
-}
-
-
-//double f(vector<double> x) {
-//    return 2 * x[0] * x[0] + x[1] * x[1] - 12 * x[0];
-//}
-//
-//vector<double> grad_f(vector<double> x) {
-//    vector<double> grad(x.size());
-//    grad[0] = 4 * x[0] - 12;
-//    grad[1] = 2 * x[1];
-//    return grad;
-//}
-//
-//vector<double> H_grad_f(vector<double> x) {
-//    vector<double> grad = grad_f(x);
-//    grad[0] *= 0.25;
-//    grad[1] *= 0.5;
-//    return grad;
-//}
-//
-//double norma_grad_f(vector<double> x) {
-//    double value = 0;
-//    for (int i = 0; i < x.size(); i++) {
-//        value += pow(grad_f(x)[i], 2);
-//    }
-//    value = pow(value, 0.5);
-//    return value;
-//}
-
-vector<double> gradientMethod(double epsilon, vector<double> x0) {
-    vector<double> x = x0;
-    double f_x = f(x);
-
-    while (true) {
-        double norm_grad = norma_grad_f(x);
-        if (norm_grad < epsilon) {
-            break;
-        }
-
-        vector<double> new_x(x.size());
-        for (int i = 0; i < x.size(); i++) {
-            new_x[i] = x[i] - H_grad_f(x)[i];
-        }
-        double new_f_x = f(new_x);
-
-        x = new_x;
+    static double f(double u1, double u2)
+    {
+        return u1 * u1 + u1 * u2 + u2 * u2;
     }
 
-    return x;
-}
+    static double g_1(double u1, double u2)
+    {
+        return u1 + u2 - 2;
+    }
 
-int main() {
-    double epsilon = 0.01, a = 1, b = 0;
-    vector<double> x = { a,b };
-    vector<double> z = gradientMethod(epsilon, x);
-    for (double xi : z)
-        cout << xi << endl;
-    cout << f(z);
-    return 0;
+    static double P_k(double u1, double u2, double k)
+    {
+        return k * Math.Pow(g_1(u1, u2), 2);
+    }
+
+    static double F_k(double u1, double u2, double k)
+    {
+        return f(u1, u2) + P_k(u1, u2, k);
+    }
+
+    static double dFx(double x, double y, double k)
+    {
+        return (F_k(x + 0.0001, y, k) - F_k(x, y, k)) / 0.0001;
+    }
+
+    static double dFy(double x, double y, double k)
+    {
+        return (F_k(x, y + 0.0001, k) - F_k(x, y, k)) / 0.0001;
+    }
+
+    static double ddFx(double x, double y, double k)
+    {
+        return (dFx(x + 0.0001, y, k) - dFx(x, y, k)) / 0.0001;
+    }
+
+    static double ddFy(double x, double y, double k)
+    {
+        return (dFy(x, y + 0.0001, k) - dFy(x, y, k)) / 0.0001;
+    }
+
+    static double ddFxy(double x, double y, double k)
+    {
+        return (dFy(x + 0.0001, y, k) - dFy(x, y, k)) / 0.0001;
+    }
+
+    static double findNormOfgrad(double x, double y, double k)
+    {
+        return Math.Sqrt(Math.Pow(dFx(x, y, k), 2) + Math.Pow(dFy(x, y, k), 2));
+    }
+
+    static double findgradX(double x, double y, double k)
+    {
+        return dFx(x, y, k);
+    }
+
+    static double findgradY(double x, double y, double k)
+    {
+        return dFy(x, y, k);
+    }
+
+    static Matrix<double> findH(double x0, double y0, double k)
+    {
+        double[,] hArray = { { ddFx(x0, y0, k), ddFxy(x0, y0, k) }, { ddFxy(x0, y0, k), ddFy(x0, y0, k) } };
+        return Matrix<double>.Build.DenseOfArray(hArray);
+    }
+
+    static double[] minim_method(double x0, double y0, double k, double eps)
+    {
+        double f0 = F_k(x0, y0, k);
+        Matrix<double> H = findH(x0, y0, k).Inverse();
+        while (findNormOfgrad(x0, y0, k) >= eps)
+        {
+            var gradX = findgradX(x0, y0, k);
+            var gradY = findgradY(x0, y0, k);
+            var updatedX = x0 - (gradX * H[0, 0] + gradY * H[1, 0]);
+            var updatedY = y0 - (gradX * H[0, 1] + gradY * H[1, 1]);
+            x0 = updatedX;
+            y0 = updatedY;
+        }
+
+        return new double[] { x0, y0 };
+    }
 }
